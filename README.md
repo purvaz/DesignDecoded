@@ -1,2 +1,2 @@
 # DesignDecoded
-A repository that will contain all the System Design problems I have come across till now. 
+A curated collection of system design solutions, architectural insights, and best practices for building scalable and reliable systems.
