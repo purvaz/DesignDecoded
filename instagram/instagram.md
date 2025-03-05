@@ -1,1 +1,1 @@
-
+Design a simple model of Facebook/Instagram where people can add other people as friends. In addition, people can post messages, and those messages are visible on their friends' pages. The design should be such that it can handle 10M people. There may be, on average, 100 friends each person has. Every day, each person posts around 10 messages on average.
