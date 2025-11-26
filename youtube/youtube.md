@@ -35,14 +35,14 @@ POST /videos \
 	 &nbsp;&nbsp;&nbsp;&nbsp; Video, \
 	 &nbsp;&nbsp;&nbsp;&nbsp; VideoMetadata \
 } \
-This is a POST request (obviously) since we are uploading the data to YouTube. This, however, will only work for smaller videos and not for the larger ones due to the restrictions on APIs for the amount of data transferred. 
+This is a POST request (obviously) since we are uploading the data to YouTube. This, however, will only work for smaller videos and not for the larger ones due to the restrictions on APIs for the amount of data transferred. \
 
 **2. Watch a Video** \
 GET /videos/:videoId -> \
 returns { \
 	 &nbsp;&nbsp;&nbsp;&nbsp; Video, \
 	 &nbsp;&nbsp;&nbsp;&nbsp; VideoMetadata \
-} \
+} 
 
 ## 4. High-Level Design
 HLD satisfies the Functional Requirements.
@@ -74,15 +74,15 @@ Deep Dives satisfy the Non-Functional Requirements.
 
 #### 1. Support uploading and streaming for large videos: 
 **Problem:** The current design has some key limitations. For example, if the video is 10GB large and if the user wants to upload or download the video, we need to consider a few things. The user will need to have 10GB of free memory, stable connection and also, the user will need to wait till the video is downloaded. We do not want the user to wait for a long time. Streaming should start immediately. \
-**Solution:** In order to solve this issue, we will be adding a new service called “chunker” which will simply divide the video into chunks. When a video is uploaded to the S3 database, a S3 notification is sent to the chunker in addition to the videoMetaData. The chunker will break the video into smaller chunks of 2-10 second clips and return the set of chunks back to S3. It will also send the set of ordered urls to videoMetaData. videoMetaData will store the ordered list of the s3urls and return this whenever the user needs to download the video instead of sending the full s3url of the video. <br />
+**Solution:** In order to solve this issue, we will be adding a new service called “chunker” which will simply divide the video into chunks. When a video is uploaded to the S3 database, a S3 notification is sent to the chunker in addition to the videoMetaData. The chunker will break the video into smaller chunks of 2-10 second clips and return the set of chunks back to S3. It will also send the set of ordered urls to videoMetaData. videoMetaData will store the ordered list of the s3urls and return this whenever the user needs to download the video instead of sending the full s3url of the video. <br /> <br />
 **Problem:** A question might arise that why are we performing redundant operation of breaking the video down into chunks before uploading and then again stitching it up at S3 only to break it into chunks again. \
 **Solution:** The reality is that the two chunks are optimized it for the function that is being performed. The upload may have larger chunks to minimize the number of requests. Whereas for downloading, the videos are chunked into smaller parts to optimize the video playback experience. 
 
 #### 2. Low latency streaming <500ms even in low bandwidth:
 **Problem:** Chunking satisfies the low latency streaming, but we need to handle the low bandwidth support requirement. Even though we have chunks, it might take the chunk of 2 seconds maybe 10 mins to download with a bad internet connection if the video is 4k.\
-**Solution:** For this, we can have a transcoder, which will take a video of the resolution that it has been uploaded at (highest resolution) and make copies with lower resolution to support lesser bandwidth users. When a video is chunked, the set of chunks can be sent to the transcoders. There can be different transcoders for different resolutions. Like one for 4k, one for 1080p, one for 720p and so on until 240p. All of these work in parallel and the resulting data is sent to videoMetaData to store the chunks of different resolutions. Now, when the user requests for a particular video, the appropriate resolution chunks of urls can be sent to the user based on the network connectivity at the user’s end. <br />
+**Solution:** For this, we can have a transcoder, which will take a video of the resolution that it has been uploaded at (highest resolution) and make copies with lower resolution to support lesser bandwidth users. When a video is chunked, the set of chunks can be sent to the transcoders. There can be different transcoders for different resolutions. Like one for 4k, one for 1080p, one for 720p and so on until 240p. All of these work in parallel and the resulting data is sent to videoMetaData to store the chunks of different resolutions. Now, when the user requests for a particular video, the appropriate resolution chunks of urls can be sent to the user based on the network connectivity at the user’s end. <br /> <br />
 **Problem:** What about when the network connectivity changes mid video? What if the user is watching a video at a stable connection at home, and then decided to leave their house and go out where the connection has been downgraded to 3G? \
-**Solution:** We need to have adaptive bit rate for this. Instead of grabbing all the chunks of the same resolution, a periodic check is performed at the user’s end to see if the network is stable. If the connection bandwidth changes, then the appropriate chunks are retrieved from the database. \
+**Solution:** We need to have adaptive bit rate for this. Instead of grabbing all the chunks of the same resolution, a periodic check is performed at the user’s end to see if the network is stable. If the connection bandwidth changes, then the appropriate chunks are retrieved from the database. 
 
 #### 3.Availability >>> Consistency in video uploads:
 We have done this inherently by doing async processing of the video using chunks.
