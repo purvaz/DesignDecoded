@@ -205,8 +205,7 @@ HLD satisfies the Functional Requirements.
 - Also, a user might be a seller, and they need to communicate with the product catalog service as a seller, and the product catalog service needs to make sure the seller is authenticated. Hence this will be a 2 way communication between the user and product catalog services. 
 - A user who purchases a product should be able to write a review and also, before buying, the user should be able to look at the reviews. 
 - A user should be able to add things into their cart even without logging in or signing up. But they shouldnt be able to place an order without signing up. 
-- Next, after a user proceeds to checkout, the order service comes in. Notice that the order service only comes in when the user follows the proper flow of  
-<p align="center"> login/signup → search (optional) → select product → add product to cart → checkout </p>  
+- Next, after a user proceeds to checkout, the order service comes in. Notice that the order service only comes in when the user follows the proper flow of **login/signup → search (optional) → select product → add product to cart → checkout**
 - Without following the above flow, the user cannot directly check out and pay. Also, the wallet service needs to authenticate the user and hence communicates with the user management service. 
 - Only when the payment goes through, an order is generated. Once the order is placed, the inventory management system must be updated as the product count will have decreased. 
 - The notifications system must be updated once a payment goes through, whenever there are any changes in the order status, when there are abandoned items in the cart sitting for too long, whenever a product is whishlisted and becomes available, when a user creates an account for the first time or when a payment is successful.
@@ -214,8 +213,41 @@ HLD satisfies the Functional Requirements.
 - A CRON job runs periodically to gather the data from all the microservices. The reason why this is periodic and not realtime is because the analytics data need not be real time and can be a few hours old. 
 - This service can further be linked to PowerBI or Tableau for report generation.
 
+## 5. Deep Dives  
+Deep Dives satisfy the Non-Functional Requirements.  
 
+**1. Scalability: Support high traffic, spikes and large product catalogs**
+- Designing this architecture as microservices interacting with each other allows the system to be scalable. 
+- Additionally, stateless services behind the API gateway allows for any request to go to any instance and not check which instance was serving it before. 
+- Whenever a particular service has additional customer traffic, it can be horizontally scaled (auto scaling). 
+- Wherever there are high traffic database reads (for example, search) the database can be sharded. In other cases, we can use replication for read heavy operations. 
+- Using kafka async workflows for non-linear or low priority workflows.
 
+**2. Reliability: 99.99% uptime and handle failures**
+- This can be achieved by service replication and load balancing.
+- Also, for DB replication, the NoSQL DB has a single leader - indexed replicas kind of an architecture. And the elasticsearch DB can be sharded. 
 
+**3. Performance: Fast page loads, quick searches and smooth experience**
+- Redis cache in search or in other hot paths helps in reducing speed. Other hot paths include product catalog and recommendations service. 
+- Indexing for fast retrieval implemented in Elasticsearch database. The partitioning is done based on product_id and keyword based or fuzzy search support is provided.
+- Read replicas for all the relational databases assumed, write can be done on a single leader and read replicas are updated. 
+- Async processing for non-critical paths are used for Notification, Analytics and Recommendations using Kafka. 
 
+**4. Security and Compliance: Protect sensitive data, comply with norms**
+- The system uses Transport Layer Security (TLS) protocols for all communication. The communication from the client to the API Gateway is via HTTPS, similarly from gateway to microservices is using HTTPS or mTLS or similar. 
+- JWT authentication is used for maintaining the statelessness of the system. Since the tokens contain the information to identify the user and also the roles, it can be used to scale horizontally and needs no session storage. 
+- All the data in the databases is encrypted.
+- Payment data is stored as per compliance. 
 
+**5. Maintainability: Choose right architecture (monolith vs microservices), enable CI/CD**
+- Using microservices architecture allows us to build, test and deploy each service independently. Using monolithic architecture for such a big ecosystem would not be feasible. 
+- Each service has its own CI/CD pipeline for safe, repeatable deployments.
+
+**6. Observability: Logging, monitoring and alerting for system health**
+- All logs are stored centrally using ELK. 
+- All the metrics and data will be collected and visualized using data visualization tools.
+- Automatic notifications are triggered when the threshold breaks or breaches happen. 
+
+**7. Cost efficiency: Optimize resource usage while balancing cost and performance**
+- Autoscaling used for microservices, DBs, Kafka consumers and caching used for search, recommendations and hot products. 
+- Async pipelines are used as Kafta
