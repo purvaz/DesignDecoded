@@ -46,123 +46,123 @@ For this, it is pretty straightforward when you have the functional requirements
 #### a. User Service:
 
 **Database:** Users DB (Relational: MySQL/PostgreSQL)\
-**Attributes:** user_id, username, email, phone_number, hashed_password, created_at, updated_at\
-**Core Responsibilities:**\
-Manage user registration, authentication, profile updates\
-Manage JWT tokens or server-side sessions\
-Provide user information to other services via REST APIs\
-**APIs:**
-POST /auth/signup\
-POST /auth/login\
-GET /users/{user_id}\
-PATCH /users/{user_id}
+**Attributes:** user_id, username, email, phone_number, hashed_password, created_at, updated_at \
+**Core Responsibilities:** \
+&emsp; Manage user registration, authentication, profile updates \
+&emsp; Manage JWT tokens or server-side sessions\
+&emsp; Provide user information to other services via REST APIs \
+**APIs:** \
+&emsp; POST /auth/signup\
+&emsp; POST /auth/login\
+&emsp; GET /users/{user_id}\
+&emsp; PATCH /users/{user_id}
 
 #### b. Product Catalog Service:
 
-**Database:**\ 
-Products DB: Document-Based (NoSQL)\ 
-Categories DB: Document-Based (NoSQL)\ 
-**Attributes:**\ 
-Products DB: product_id (PK), seller_id (FK), category_id (FK), name, description, price, stock_available, created_at, updated_at\
-Categories DB: category_id (PK), name, parent_id (NULL if top-level)\
-**Core Responsibilities:**\ 
-Store product information, maintain category hierarchy\
-Provide product listings, creation, updates\
-Update inventory on successful order purchase\
-**APIs:**\
-POST /products\
-GET /products/{product_id}\
-PATCH /products/{product_id}\
-GET /categories
+**Database:** \ 
+&emsp; Products DB: Document-Based (NoSQL) \ 
+&emsp; Categories DB: Document-Based (NoSQL) \ 
+**Attributes:** \ 
+&emsp; Products DB: product_id (PK), seller_id (FK), category_id (FK), name, description, price, stock_available, created_at, updated_at \
+&emsp; Categories DB: category_id (PK), name, parent_id (NULL if top-level) \
+**Core Responsibilities:** \ 
+&emsp; Store product information, maintain category hierarchy \
+&emsp; Provide product listings, creation, updates \
+&emsp; Update inventory on successful order purchase \
+**APIs:** \
+&emsp; POST /products \
+&emsp; GET /products/{product_id} \
+&emsp; PATCH /products/{product_id} \
+&emsp; GET /categories
 
 #### c. Search Service:
 
-**Database:** search-index DB (Elasticsearch)\
-**Attributes:**\ 
-Search documents (indexed from products catalog)\
-Typical fields include product_id, name, description, price, category, keywords\
-**Core Responsibilities:**\
-Full text search, auto-suggest, filtering\
-Update indexes in near real-time or batches from Product Catalog Service\
-**APIs:**
-GET /search?q=iphone\
-GET /suggest?prefix=iph
+**Database:** search-index DB (Elasticsearch) \
+**Attributes:** \ 
+&emsp; Search documents (indexed from products catalog) \
+&emsp; Typical fields include product_id, name, description, price, category, keywords \
+**Core Responsibilities:** \
+&emsp; Full text search, auto-suggest, filtering \
+&emsp; Update indexes in near real-time or batches from Product Catalog Service \
+**APIs:** \
+&emsp; GET /search?q=iphone \
+&emsp; GET /suggest?prefix=iph
 
 #### d. Shopping Cart Service:
 
-**Database:** Carts-DB (Relational for persistence), Cart_Items DB\
-**Attributes:**\
-Cart (cart_id (PK), user_id, status (active/abandoned), created_at, updated_at)\
-Cart_items (cart_item_id (PK), cart_id (FK), product _id, quantity, price_when_added)\
-**Core Responsibilities:**\
-Maintains user cart states (items, quantities, sub-total)\
-Provides APls to add/remove items, fetch/update cart\
-**APls:**
-POST / cart/add\
-POST / cart/remove\
-GET / cart
+**Database:** Carts-DB (Relational for persistence), Cart_Items DB \
+**Attributes:** \
+&emsp; Cart (cart_id (PK), user_id, status (active/abandoned), created_at, updated_at) \
+&emsp; Cart_items (cart_item_id (PK), cart_id (FK), product _id, quantity, price_when_added) \
+**Core Responsibilities:** \
+&emsp; Maintains user cart states (items, quantities, sub-total) \
+&emsp; Provides APls to add/remove items, fetch/update cart \
+**APls:** \ 
+&emsp; POST / cart/add \
+&emsp; POST / cart/remove \
+&emsp; GET / cart
 
 #### e. Order Service:
 
-**Database:** Orders DB (Relational, with ACID compliance)\
-**Attributes:**\ 
-Orders: order_id (PK), user_id (FK), total_amount, status, created_at, updated_at\
-Order_items: order_item_id(PK), order_id(FK), product_id(FK), quantity, price\
-**Core Responsibilities:**\ 
-Create and manage orders, track lifestyle (pending, paid, shipped, delivered)\
-Coordinate with Payment service, update inventory in product catalog\
-Issue notifications\ 
-**APIs:**\
-POST /orders(checkout)\
-GET /orders/{order_id}\
-POST /notifications/{order_id, status}\
-POST /inventory/{product_id, quantity}
+**Database:** Orders DB (Relational, with ACID compliance) \
+**Attributes:** \ 
+&emsp; Orders: order_id (PK), user_id (FK), total_amount, status, created_at, updated_at \
+&emsp; Order_items: order_item_id(PK), order_id(FK), product_id(FK), quantity, price \
+**Core Responsibilities:** \ 
+&emsp; Create and manage orders, track lifestyle (pending, paid, shipped, delivered) \
+&emsp; Coordinate with Payment service, update inventory in product catalog \
+&emsp; Issue notifications \ 
+**APIs:** \
+&emsp; POST /orders(checkout) \
+&emsp; GET /orders/{order_id} \
+&emsp; POST /notifications/{order_id, status} \
+&emsp; POST /inventory/{product_id, quantity}
 
 #### f. Payments Service:
 
-**Database:** Payments DB (Relational with strong consistency)\
-**Attributes:** payment_id (PK), order_id(FK), wallet_id(FK), payment_method, transaction_ref, created_at, updated_at\
-**Core Responsibilities:**\
-Integrate with external gateways (PayPal, Stripe)\
-Manage payment auth, captures, refunds\
-Store transaction details for audits\
-**APIs:**\
-POST /payments/pay (initiate)\
-GET /payments/refunds
+**Database:** Payments DB (Relational with strong consistency) \
+**Attributes:** payment_id (PK), order_id(FK), wallet_id(FK), payment_method, transaction_ref, created_at, updated_at \
+**Core Responsibilities:** \
+&emsp; Integrate with external gateways (PayPal, Stripe) \
+&emsp; Manage payment auth, captures, refunds \
+&emsp; Store transaction details for audits \
+**APIs:** \
+&emsp; POST /payments/pay (initiate) \
+&emsp; GET /payments/refunds
 
 #### g. Reviews and Ratings Service:
 
-**Database:** Reviews DB (Relational or Documents-Based)\
-**Attributes:** review_id (PK), user_id(FK), product_id(FK), rating, comment, created_at, updated_at\
-**Core Responsibilities:**\
-Store user reviews and ratings\
-Aggregate ratings\ 
-**APIs:**\
-POST /reviews\
-GET /reviews?product_id=xxx
+**Database:** Reviews DB (Relational or Documents-Based) \
+**Attributes:** review_id (PK), user_id(FK), product_id(FK), rating, comment, created_at, updated_at \
+**Core Responsibilities:** \
+&emsp; Store user reviews and ratings \
+&emsp; Aggregate ratings \ 
+**APIs:** \
+&emsp; POST /reviews \
+&emsp; GET /reviews?product_id=xxx
 
 #### h. Notifications Service:
 
-**Database:** Notifications DB (Optional) - can be Relational or Key-Value based\
-**Attributes:** notifications_id (PK), user_id(FK), type (email, SMS, in-app), status (sent/failed), created_at, updated_at\
-**Core Responsibilities:**\
-Send emails, SMS, push notifications based on events\
-Subscribe to event bus, can be called directly by other services\
-**APIs:**\
-POST /notifications
+**Database:** Notifications DB (Optional) - can be Relational or Key-Value based \
+**Attributes:** notifications_id (PK), user_id(FK), type (email, SMS, in-app), status (sent/failed), created_at, updated_at \
+**Core Responsibilities:** \
+&emsp; Send emails, SMS, push notifications based on events\
+&emsp; Subscribe to event bus, can be called directly by other services\
+**APIs:** \
+&emsp; POST /notifications
 
 #### i. Analytics Service:
 
-**Database:** Analytics DB - Data Warehouse (OLAP)\
-**Attributes:**\ 
-Various fact tables (orders, product views, user registrations, reviews)\
-Dimension tables for products, users, time\
-**Core Responsibilities:**\
-Collect data from orders, products, user activity for reporting\
-Provides dashboards or reports (seller performance, user engagement)\
-**APIs:**\
-Batch ETL or real-time streaming from other microservices\
-Internal dashboard for analytics
+**Database:** Analytics DB - Data Warehouse (OLAP) \
+**Attributes:** \ 
+&emsp; Various fact tables (orders, product views, user registrations, reviews) \
+&emsp; Dimension tables for products, users, time \
+**Core Responsibilities:** \
+&emsp; Collect data from orders, products, user activity for reporting\
+&emsp; Provides dashboards or reports (seller performance, user engagement)\
+**APIs:** \
+&emsp; Batch ETL or real-time streaming from other microservices\
+&emsp; Internal dashboard for analytics
 
 
 
